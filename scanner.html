@@ -387,7 +387,7 @@ function getFrameBitmap(){
 
 async function scanLoop(){
   let noCodeFrames = 0;
-  const NO_CODE_RESET = 3;
+  const NO_CODE_RESET = 25; // ~3 secondi a 120ms/frame — evita reset per micro-interruzioni jsQR
 
   while(scanning){
     try{
