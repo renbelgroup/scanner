@@ -386,15 +386,24 @@ function getFrameBitmap(){
 }
 
 async function scanLoop(){
+  let noCodeFrames = 0;
+  const NO_CODE_RESET = 3;
+
   while(scanning){
     try{
       const img=getFrameBitmap();
       if(img){
         const code=jsQR(img.data,img.width,img.height,{inversionAttempts:'dontInvert'});
         if(code&&code.data){
+          noCodeFrames=0;
           const raw=String(code.data).trim();
-          if(raw&&throttleOk()){
-            if(raw!==lastDecoded||throttleOk()){ lastDecoded=raw; onDecode(raw); }
+          if(raw && raw!==lastDecoded){
+            lastDecoded=raw; onDecode(raw);
+          }
+        } else {
+          noCodeFrames++;
+          if(noCodeFrames>=NO_CODE_RESET && lastDecoded!==''){
+            lastDecoded='';
           }
         }
       }
@@ -405,7 +414,7 @@ async function scanLoop(){
 
 /* ── ON DECODE ── */
 function onDecode(value){
-  const tipo=currentTipo(); lastSentAt=Date.now();
+  const tipo=currentTipo();
   const s=String(value).replace(/[\u0000-\u001F\u007F]/g,'').replace(/\r?\n/g,'').trim().toUpperCase();
   if(!s) return;
   showTickOnce(); enqueue(s,tipo);
